@@ -258,17 +258,43 @@ class irisRecognition(object):
         return codeBinaries
 
     @torch.inference_mode()
-    def extractIBBCode(self, polar): #, mask):
+    def extractIBBCode(self, polar):  # , mask):
         if polar is None:
             return None
-        codeBinaries = []
-        # TODO implement LBP
+
+        # Parameters for LBP
+        radius = 1  # neighborhood radius
+        neighbors = 8  # number of neighbors for LBP
+
+        # Pad image for circular neighborhood
+        padded = np.pad(polar, pad_width=radius, mode='edge')
+        height, width = polar.shape
+
+        codeBinaries = np.zeros((neighbors, height, width), dtype=bool)
+
+        # Compute LBP codes
+        angles = 2 * np.pi * np.arange(neighbors) / neighbors
+        dy = -np.round(radius * np.sin(angles)).astype(int)
+        dx = np.round(radius * np.cos(angles)).astype(int)
+
+        for i in range(neighbors):
+            shifted = padded[radius + dy[i]:radius + dy[i] + height, radius + dx[i]:radius + dx[i] + width]
+            codeBinaries[i, :, :] = shifted >= polar
         return codeBinaries
 
     @torch.inference_mode()
-    def matchIBBCodes(self, codes1, codes2): #, mask1, mask2):
-        score = -1
-        # TODO implement score calculation
+    def matchIBBCodes(self, codes1, codes2):  # , mask1, mask2):
+        if codes1 is None or codes2 is None:
+            return -1
+
+        # Ensure both codes have the same shape
+        assert codes1.shape == codes2.shape, "LBP code shapes must match"
+
+        # XOR to find differences
+        xor = np.logical_xor(codes1, codes2)
+
+        # Compute normalized score (fraction of differing bits)
+        score = np.sum(xor) / xor.size
         return score
 
 

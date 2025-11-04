@@ -5,9 +5,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import roc_curve
 
-
 # Read similarity matrix and file names
-distance_matrix = pd.read_csv('hbdif_distance_matrix.csv', header=None).to_numpy()
+distance_matrix = pd.read_csv("lbp_distance_matrix.csv", header=None).to_numpy()
 file_names = os.listdir("./IBB_A2_Data/")
 
 # Fill the bottom left triangle
@@ -44,7 +43,7 @@ impostor_scores = np.array(impostor_scores)
 # Calculate EER score
 labels = np.concatenate([np.ones_like(genuine_scores), np.zeros_like(impostor_scores)])
 distance_scores = np.concatenate([genuine_scores, impostor_scores])
-similarity_scores = 1 - distance_scores
+similarity_scores = 1 - distance_scores  # convert distance to similarity
 fpr, tpr, thresholds = roc_curve(labels, similarity_scores)
 fnr = 1 - tpr
 eer_threshold = thresholds[np.argmin(np.absolute(fnr - fpr))]

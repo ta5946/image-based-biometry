@@ -45,9 +45,9 @@ def main(cfg):
         polar_mask_list.append(mask_polar)
 
         # human-driven BSIF encoding:
-        code = irisRec.extractCode(im_polar)
+        # code = irisRec.extractCode(im_polar)
         # TODO:
-        # code = irisRec.extractIBBCode(im_polar)  #[, mask]) < masks are up to you where to use them
+        code = irisRec.extractIBBCode(im_polar)  # [, mask]) < masks are up to you where to use them
 
         # print(code.shape)
         code_list.append(code)
@@ -66,17 +66,17 @@ def main(cfg):
     # Matching (all-vs-all, as an example)
     similarity_matrix = np.zeros((len(code_list), len(code_list)))
     for code1, mask1, fn1, i in zip(code_list, polar_mask_list, filename_list, range(len(code_list))):
+        print(fn1)
         for code2, mask2, fn2, j in zip(code_list, polar_mask_list, filename_list, range(len(code_list))):
             if i < j:
-                score, shift = irisRec.matchCodesEfficient(code1, code2, mask1, mask2)
-                # TODO: 
-                # score = irisRec.matchIBBCodes(code1, code2) #[, mask1, mask2]) < masks are up to you where to use them
-                print("{} <-> {} : {:.3f} (mutual rot: {:.2f} deg)".format(fn1, fn2, score,
-                                                                           360 * shift / irisRec.polar_width))
+                # score, shift = irisRec.matchCodesEfficient(code1, code2, mask1, mask2)
+                # TODO:
+                score = irisRec.matchIBBCodes(code1, code2)  # [, mask1, mask2]) < masks are up to you where to use them
+                # print("{} <-> {} : {:.3f} (mutual rot: {:.2f} deg)".format(fn1, fn2, score, 360 * shift / irisRec.polar_width))
                 similarity_matrix[i, j] = score
 
     # Save similarity matrix
-    np.savetxt("hbdif_distance_matrix.csv", similarity_matrix, delimiter=",")
+    np.savetxt("lbp_distance_matrix.csv", similarity_matrix, delimiter=",")
     return None
 
 
