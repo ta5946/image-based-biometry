@@ -16,6 +16,24 @@ IrisRecognition.py, function `matchIBBCodes`.
 
 ## Local Binary Patterns distance
 
-- 
+- Basic, parameters `R=1`, `P=8`
 
 _Equal error rate 9.67% at similarity threshold 0.58_
+
+- Basic, parameters `R=2`, `P=16`
+
+_Equal error rate 9.07% at similarity threshold 0.59_
+
+- Basic, parameters `R=3`, `P=24`
+
+_Equal error rate 7.84% at similarity threshold 0.59_
+
+- Basic, parameters `R=5`, `P=40`
+
+_Equal error rate 6.80% at similarity threshold 0.61_
+
+- **Uniform** LBP did not improve the accuracy!
+
+- Basic with **CLAHE**, parameters `R=3`, `P=24`
+
+_Equal error rate 6.58% at similarity threshold 0.56_

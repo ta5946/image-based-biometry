@@ -257,18 +257,24 @@ class irisRecognition(object):
             codeBinaries.append(codeBinary.cpu().numpy())
         return codeBinaries
 
+
+    # TODO Describe main improvements and optimizations of LBP
     @torch.inference_mode()
     def extractIBBCode(self, polar):  # , mask):
-        if polar is None:
+        if polar is None or polar.dtype != np.uint8:
             return None
 
         # Parameters for LBP
-        radius = 1  # neighborhood radius
-        neighbors = 8  # number of neighbors for LBP
+        radius = 3  # neighborhood radius
+        neighbors = 24  # number of neighbors
+
+        # Apply CLAHE to enhance contrast
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        enhanced_polar = clahe.apply(polar)
 
         # Pad image for circular neighborhood
-        padded = np.pad(polar, pad_width=radius, mode='edge')
-        height, width = polar.shape
+        padded = np.pad(enhanced_polar, pad_width=radius, mode="edge")
+        height, width = enhanced_polar.shape
 
         codeBinaries = np.zeros((neighbors, height, width), dtype=bool)
 
@@ -279,21 +285,18 @@ class irisRecognition(object):
 
         for i in range(neighbors):
             shifted = padded[radius + dy[i]:radius + dy[i] + height, radius + dx[i]:radius + dx[i] + width]
-            codeBinaries[i, :, :] = shifted >= polar
+            codeBinaries[i, :, :] = shifted >= enhanced_polar
         return codeBinaries
 
     @torch.inference_mode()
     def matchIBBCodes(self, codes1, codes2):  # , mask1, mask2):
-        if codes1 is None or codes2 is None:
+        if codes1 is None or codes2 is None or codes1.shape != codes2.shape:
             return -1
-
-        # Ensure both codes have the same shape
-        assert codes1.shape == codes2.shape, "LBP code shapes must match"
 
         # XOR to find differences
         xor = np.logical_xor(codes1, codes2)
 
-        # Compute normalized score (fraction of differing bits)
+        # Compute normalized Hamming distance
         score = np.sum(xor) / xor.size
         return score
 

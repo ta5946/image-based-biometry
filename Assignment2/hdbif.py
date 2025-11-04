@@ -76,7 +76,7 @@ def main(cfg):
                 similarity_matrix[i, j] = score
 
     # Save similarity matrix
-    np.savetxt("lbp_distance_matrix.csv", similarity_matrix, delimiter=",")
+    np.savetxt("lbp_distance_matrix_6.csv", similarity_matrix, delimiter=",")
     return None
 
 

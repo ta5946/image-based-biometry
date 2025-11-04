@@ -6,7 +6,7 @@ import seaborn as sns
 from sklearn.metrics import roc_curve
 
 # Read similarity matrix and file names
-distance_matrix = pd.read_csv("lbp_distance_matrix.csv", header=None).to_numpy()
+distance_matrix = pd.read_csv("lbp_distance_matrix_6.csv", header=None).to_numpy()
 file_names = os.listdir("./IBB_A2_Data/")
 
 # Fill the bottom left triangle
