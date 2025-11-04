@@ -37,3 +37,7 @@ _Equal error rate 6.80% at similarity threshold 0.61_
 - Basic with **CLAHE**, parameters `R=3`, `P=24`
 
 _Equal error rate 6.58% at similarity threshold 0.56_
+
+- Basic with CLAHE and rotation compensation, parameters `R=3`, `P=24`
+
+**Equal error rate 2.79% at similarity threshold 0.57**

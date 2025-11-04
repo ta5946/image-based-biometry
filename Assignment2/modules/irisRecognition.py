@@ -258,7 +258,7 @@ class irisRecognition(object):
         return codeBinaries
 
 
-    # TODO Describe main improvements and optimizations of LBP
+    # TODO Describe the improvements and optimizations of LBP
     @torch.inference_mode()
     def extractIBBCode(self, polar):  # , mask):
         if polar is None or polar.dtype != np.uint8:
@@ -273,32 +273,39 @@ class irisRecognition(object):
         enhanced_polar = clahe.apply(polar)
 
         # Pad image for circular neighborhood
-        padded = np.pad(enhanced_polar, pad_width=radius, mode="edge")
+        padded_polar = np.pad(enhanced_polar, pad_width=radius, mode="edge")
         height, width = enhanced_polar.shape
 
-        codeBinaries = np.zeros((neighbors, height, width), dtype=bool)
-
+        code_binaries = np.zeros((neighbors, height, width), dtype=bool)
         # Compute LBP codes
         angles = 2 * np.pi * np.arange(neighbors) / neighbors
         dy = -np.round(radius * np.sin(angles)).astype(int)
         dx = np.round(radius * np.cos(angles)).astype(int)
 
         for i in range(neighbors):
-            shifted = padded[radius + dy[i]:radius + dy[i] + height, radius + dx[i]:radius + dx[i] + width]
-            codeBinaries[i, :, :] = shifted >= enhanced_polar
-        return codeBinaries
+            shifted_neighbors = padded_polar[radius + dy[i]:radius + dy[i] + height, radius + dx[i]:radius + dx[i] + width]
+            code_binaries[i, :, :] = shifted_neighbors >= enhanced_polar
+
+        return code_binaries
 
     @torch.inference_mode()
     def matchIBBCodes(self, codes1, codes2):  # , mask1, mask2):
         if codes1 is None or codes2 is None or codes1.shape != codes2.shape:
             return -1
 
-        # XOR to find differences
-        xor = np.logical_xor(codes1, codes2)
+        # Parameter for rolling
+        max_shift = 8
 
-        # Compute normalized Hamming distance
-        score = np.sum(xor) / xor.size
-        return score
+        best_score = 1.0
+        # Roll to compensate for rotation
+        for shift in range(-max_shift, max_shift + 1):
+            rolled_codes2 = np.roll(codes2, shift, axis=2)  # along width
+            bit_diff = np.logical_xor(codes1, rolled_codes2)
+            score = np.sum(bit_diff) / bit_diff.size  # normalized Hamming distance
+            if score < best_score:
+                best_score = score
+
+        return best_score
 
 
     @torch.inference_mode()
